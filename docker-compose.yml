@@ -1,0 +1,132 @@
+version: "3.9"
+
+x-airflow-common:
+  &airflow-common
+  build:
+    context: ./airflow
+    dockerfile: Dockerfile
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@airflow-postgres:5432/airflow
+    - AIRFLOW__CORE__FERNET_KEY=FB0o_zt4e3Ziq3LdUUO7F2Z95cvFFx16hU8jTeR1ASM=
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    - AIRFLOW__CORE__LOGGING_LEVEL=INFO
+    # Устанавливаем информацию о пользователях
+    - _AIRFLOW_DB_UPGRADE=True 
+    - _AIRFLOW_WWW_USER_CREATE=True
+    - _AIRFLOW_WWW_USER_USERNAME=airflow 
+    - _AIRFLOW_WWW_USER_PASSWORD=airflow
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/airflow.cfg:/opt/airlfow/airflow.cfg
+  depends_on:
+    - airflow-postgres
+  networks:
+    - docker_network
+
+
+services:
+  airflow-postgres:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      - POSTGRES_HOST=airflow-postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=airflow
+      - POSTGRES_PORT=5432
+    ports:
+      - "5432:5432"
+    networks:
+      - docker_network
+
+  airflow-init:
+    << : *airflow-common
+    command: airflow db init
+    environment:
+      - _AIRFLOW_DB_UPGRADE=True 
+      - _AIRFLOW_WWW_USER_CREATE=True
+      - _AIRFLOW_WWW_USER_USERNAME=airflow 
+      - _AIRFLOW_WWW_USER_PASSWORD=airflow
+    restart: on-failure
+    networks:
+      - docker_network
+
+  airflow-webserver:
+    << : *airflow-common
+    command: airflow webserver
+    ports:
+      - 8012:8080
+    restart: unless-stopped
+    networks:
+      - docker_network
+
+  airflow-scheduler:
+    << : *airflow-common
+    command: airflow scheduler
+    restart: unless-stopped
+    networks:
+      - docker_network
+
+  influxdb:
+    image: influxdb:2.7.10
+    restart: unless-stopped
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=12345678
+      - DOCKER_INFLUXDB_INIT_ORG=admin
+      - DOCKER_INFLUXDB_INIT_BUCKET=admin
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=admin
+    ports:
+      # HTTP API
+      - "8010:8086"  
+      # InfluxDB UI
+      - "8011:8088"  
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+    networks:
+      - docker_network
+
+  qdrant:
+    image: qdrant/qdrant:v1.9.4
+    restart: unless-stopped
+    ports:
+      - "8013:6333"
+    environment:
+      QDRANT_HTTP_PORT: 6333
+      QDRANT_STORAGE_PATH: /qdrant/storage
+    volumes:
+      - ./qdrant:/qdrant/storage
+    networks:
+      - docker_network 
+    
+  research:
+    build:
+      context: ./research
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./research:/home/jovyan/work
+    networks:
+      - docker_network
+
+volumes:
+  backend:
+    driver: local
+  mlflow:
+    driver: local
+  influxdb:
+    driver: local
+  qdrant:
+    driver: local
+  research:
+    driver: local
+
+networks:
+  docker_network:
+    driver: bridge

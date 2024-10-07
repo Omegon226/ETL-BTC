@@ -1,0 +1,4 @@
+pandas==2.2.2
+numpy==1.26.4
+influxdb-client==1.45.0
+ccxt==4.4.2

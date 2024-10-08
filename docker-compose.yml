@@ -132,6 +132,18 @@ services:
     networks:
       - docker_network
 
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8002:8501"
+    volumes:
+      - ./dashboard:/home/jovyan/work
+    networks:
+      - docker_network
+
   research:
     build:
       context: ./research

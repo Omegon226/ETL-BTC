@@ -1,6 +1,9 @@
 FROM python:3.11
 USER root
 
+# Установите рабочий каталог
+WORKDIR /app
+
 # Обновдление установщиков
 RUN apt-get update
 RUN pip install --upgrade pip
@@ -15,18 +18,14 @@ RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
 RUN pip install TA-Lib
 RUN rm -R ta-lib ta-lib-0.4.0-src.tar.gz
 
-# Установка JupyterLab и необходимых пакетов
-RUN pip install jupyterlab
-
 # Копирование requirements.txt в контейнер
-COPY requirements.txt /tmp/
-COPY .env /tmp/
+COPY requirements.txt .
 
 # Установка зависимостей из requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Создание рабочей директории
-WORKDIR /home/jovyan/work
+# Копируйте остальную часть приложения
+COPY . .
 
 # Запуск JupyterLab
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+ENTRYPOINT ["python", "init_system.py"]

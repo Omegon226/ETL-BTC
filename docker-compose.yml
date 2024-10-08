@@ -103,6 +103,35 @@ services:
     networks:
       - docker_network 
     
+  migrationsservice:
+    build:
+      context: ./migrationsservice
+      dockerfile: Dockerfile
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    depends_on:
+      - influxdb
+      - qdrant
+    networks:
+      - docker_network
+
+  sentiment_analysis_service:
+    build:
+      context: ./sentiment_analysis_service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./sentiment_analysis_service:/app
+    networks:
+      - docker_network
+
   research:
     build:
       context: ./research
@@ -112,6 +141,9 @@ services:
       - "8888:8888"
     volumes:
       - ./research:/home/jovyan/work
+    depends_on:
+      - influxdb
+      - qdrant
     networks:
       - docker_network
 

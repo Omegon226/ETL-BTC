@@ -5,8 +5,8 @@ USER root
 WORKDIR /app
 
 # Обновдление установщиков
-RUN apt-get update
-RUN pip install --upgrade pip
+RUN apt-get update && \
+  pip install --upgrade pip
 
 # Копирование requirements.txt в контейнер
 COPY requirements.txt .

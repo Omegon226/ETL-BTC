@@ -40,8 +40,8 @@ RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
 USER airflow
 
 # Обновдление установщиков
-RUN pip install --upgrade pip
-RUN pip install TA-Lib
+RUN pip install --upgrade pip && \
+  pip install TA-Lib
 #RUN rm -R ta-lib ta-lib-0.4.0-src.tar.gz
 
 # Copy requirements.txt to the container

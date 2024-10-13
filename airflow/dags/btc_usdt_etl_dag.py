@@ -189,6 +189,25 @@ def save_to_influxdb(**kwargs):
         # Объединение DataFrame по времени (предполагается, что даты совпадают)
         combined_df = pd.merge(features_df, signals_df, on='Date', how='inner')
 
+        combined_df = combined_df[[
+            'Date', 'Open_x', 'High_x', 'Low_x', 'Close_x', 'Volume_x', 'Close_kalman_filter',
+            'Close_savitzky_golay_filter', 'Close_wavelet_filter',
+            'Close_gaussian_smoothing', 'Close_sma_smoothing',
+            'Close_exponential_smoothing', 'RSI_buy_signal', 'RSI_sell_signal',
+            'BBANDS_buy_signal', 'BBANDS_sell_signal', 'MACD_buy_signal',
+            'MACD_sell_signal', 'PPO_buy_signal', 'PPO_sell_signal',
+            'ADX_buy_signal', 'ADX_sell_signal'
+        ]]
+
+        combined_df = combined_df.rename(columns={
+            "Open_x": "Open",
+            "High_x": "High",
+            "Low_x": "Low",
+            "Close_x": "Close",
+            "Volume_x": "Volume",
+        })
+        logging.info(combined_df) 
+
         client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
         write_api = client.write_api(write_options=SYNCHRONOUS)
 

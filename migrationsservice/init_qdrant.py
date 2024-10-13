@@ -45,12 +45,14 @@ def create_qdrant_collection():
             hnsw_config=models.HnswConfigDiff(
                 ef_construct=128,
                 m=32,
+                full_scan_threshold = 100,
+                on_disk = True
             ),
             quantization_config=models.ScalarQuantization(
                 scalar=models.ScalarQuantizationConfig(
                     type=models.ScalarType.INT8,
                     quantile=1.0,  # Все данные будут сохранятся в квантизированном HNSW индексе
-                    always_ram=False
+                    always_ram=True
                 )
             )
         )

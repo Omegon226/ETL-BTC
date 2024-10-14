@@ -33,7 +33,7 @@
 * `docker-compose up -d migrationsservice`
 * `docker-compose up -d airflow-init`
 * `docker-compose up -d dashboard`
-* `docker-compose up -d airflow`
+* `docker-compose up -d airflow-webserver airflow-scheduler`
 
 ## Данные .env файла
 

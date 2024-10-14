@@ -31,7 +31,7 @@ user_input = st.number_input("Введите кол-во точек данных
 
 last_data_query = f'''
 from(bucket:"{INFLUXDB_BUCKET_NAME}")
-    |> range(start: -{user_input})
+    |> range(start: -{user_input}h)
     |> filter(fn: (r) => r["_measurement"] == "{INFLUXDB_MEASUREMENT_NAME}")
     |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
     |> sort(columns: ["_time"], desc: false)

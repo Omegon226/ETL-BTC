@@ -26,7 +26,8 @@ QDRANT_COLLECTION = 'btc_news'
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'retries': 1,
+    'retries': 5,  
+    'retry_delay': timedelta(minutes=1),  
 } 
 
 

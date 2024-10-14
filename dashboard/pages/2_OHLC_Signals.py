@@ -27,10 +27,11 @@ st.markdown(
     """
 )
 
+user_input = st.number_input("Введите кол-во точек данных для визуализации:", min_value=30, max_value=3000)
 
 last_data_query = f'''
 from(bucket:"{INFLUXDB_BUCKET_NAME}")
-    |> range(start: -300h)
+    |> range(start: -{user_input})
     |> filter(fn: (r) => r["_measurement"] == "{INFLUXDB_MEASUREMENT_NAME}")
     |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
     |> sort(columns: ["_time"], desc: false)

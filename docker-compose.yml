@@ -23,6 +23,8 @@ x-airflow-common:
     - ./airflow/airflow.cfg:/opt/airlfow/airflow.cfg
   depends_on:
     - airflow-postgres
+    - influxdb
+    - qdrant
   networks:
     - docker_network
 
@@ -139,6 +141,10 @@ services:
     restart: unless-stopped
     ports:
       - "8002:8501"
+    depends_on:
+      - sentiment_analysis_service
+      - influxdb
+      - qdrant
     volumes:
       - ./dashboard:/home/jovyan/work
     networks:
